@@ -17,7 +17,7 @@ LIBPLUG = libplug.$(LIBEXT)
 
 all: main $(LIBPLUG)
 
-main: main.c hotreload.c plug.c
+main: main.c hotreload.c plug.c hotreload.h plug.h
 	$(CC) $(CFLAGS) -o $@ main.c hotreload.c -ldl
 
 
@@ -25,7 +25,7 @@ libplug.$(LIBEXT): plug.c
 	$(CC) $(CFLAGS) -fPIC $(LIB_CFLAGS) -o $@ plug.c
 else
 all: main
-main: main.c plug.c
+main: main.c plug.c hotreload.h plug.h
 	$(CC) $(CFLAGS) -o $@ main.c plug.c
 endif
 

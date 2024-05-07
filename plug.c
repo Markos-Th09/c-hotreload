@@ -51,7 +51,6 @@ size_t strlencpy(char* dest, const char* src) {
     }
     dest[i] = '\0';
     return i;
-
 }
 
 static State* state = NULL;
