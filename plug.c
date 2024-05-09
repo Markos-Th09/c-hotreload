@@ -4,9 +4,8 @@
 #include <string.h>
 #include "plug.h"
 
-#define OP
 #define STATE_FIELDS \
-    STATE(int, x) OP \
+    STATE(int, x) \
     STATE(int, y)
 
 #ifdef HOTRELOAD
@@ -35,12 +34,10 @@ typedef struct {
     };
     #undef STATE
 
-    #undef OP
-    #define OP +
-    #define STATE(type, name) sizeof(#type)+sizeof(#name)
+
+    #define STATE(type, name) +sizeof(#type)+sizeof(#name)
     static const size_t STATE_ARENA_SIZE = sizeof(State)+sizeof(RTTI_ENTRIES)+STATE_FIELDS;
     #undef STATE
-    #undef OP
 #endif
 
 size_t strlencpy(char* dest, const char* src) {
