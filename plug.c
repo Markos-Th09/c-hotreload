@@ -17,7 +17,7 @@ typedef struct  {
 } RttiEntry;
 #endif
 
-#define STATE(type, name) type name;
+#define STATE(type, name, ...) type name __VA_ARGS__;
 typedef struct {
     #ifdef HOTRELOAD
     RttiEntry* rtti;
@@ -28,14 +28,13 @@ typedef struct {
 #undef STATE
 
 #ifdef HOTRELOAD
-    #define STATE(type, name) {#name, #type, offsetof(State, name), sizeof(((State*)0)->name)},
+    #define STATE(type, name, ...) {#name, #type #__VA_ARGS__, offsetof(State, name), sizeof(((State*)0)->name)},
     static const RttiEntry RTTI_ENTRIES[] = {
         STATE_FIELDS
     };
     #undef STATE
 
-
-    #define STATE(type, name) +sizeof(#type)+sizeof(#name)
+    #define STATE(type, name, ...) +sizeof(#type #__VA_ARGS__)+sizeof(#name)
     static const size_t STATE_ARENA_SIZE = sizeof(State)+sizeof(RTTI_ENTRIES)+STATE_FIELDS;
     #undef STATE
 #endif
