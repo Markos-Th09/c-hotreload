@@ -4,57 +4,34 @@
 #include <string.h>
 #include "plug.h"
 
-#define STATE_FIELDS \
-    STATE(int, x) \
-    STATE(int, y)
-
 #ifdef HOTRELOAD
-typedef struct  {
-    const char* name;
-    const char* type;
-    size_t offset;
-    size_t size;
-} RttiEntry;
-#endif
-
-#define STATE(type, name, ...) type name __VA_ARGS__;
-typedef struct {
-    #ifdef HOTRELOAD
-    RttiEntry* rtti;
-    size_t rtti_len;
-    #endif
-    STATE_FIELDS
-} State;
-#undef STATE
-
-#ifdef HOTRELOAD
-    #define STATE(type, name, ...) {#name, #type #__VA_ARGS__, offsetof(State, name), sizeof(((State*)0)->name)},
+    #define STATE(type, name, ...) {#name, #type, offsetof(State, name), sizeof(((State*)0)->name)},
     static const RttiEntry RTTI_ENTRIES[] = {
         STATE_FIELDS
     };
     #undef STATE
 
-    #define STATE(type, name, ...) +sizeof(#type #__VA_ARGS__)+sizeof(#name)
+    #define STATE(type, name, ...) +sizeof(#type)+sizeof(#name)
     static const size_t STATE_ARENA_SIZE = sizeof(State)+sizeof(RTTI_ENTRIES)+STATE_FIELDS;
     #undef STATE
-#endif
 
-size_t strlencpy(char* dest, const char* src) {
-    size_t i = 0;
-    while (src[i] != '\0') {
-        dest[i] = src[i];
-        i++;
+    static inline size_t strlencpy(char* dest, const char* src) {
+        size_t i = 0;
+        while (src[i] != '\0') {
+            dest[i] = src[i];
+            i++;
+        }
+        dest[i] = '\0';
+        return i;
     }
-    dest[i] = '\0';
-    return i;
-}
+#endif
 
 static State* state = NULL;
 
-static inline void init_state();
+static inline void init_state(void* s);
 static inline void merge_state(State* old_state) {
     #ifdef HOTRELOAD
-        init_state();
+        init_state(NULL);
         for (size_t i = 0; i < sizeof(RTTI_ENTRIES)/sizeof(RttiEntry); i++) {
             RttiEntry entry = RTTI_ENTRIES[i];
             for (size_t j = 0; j < old_state->rtti_len; j++) {
@@ -73,7 +50,7 @@ static inline void merge_state(State* old_state) {
     #endif
 }
 
-static inline void alloc_state_arena() {
+static inline void alloc_state_arena(void* s) {
     #ifdef HOTRELOAD
         state = malloc(STATE_ARENA_SIZE);
         state->rtti = (RttiEntry*)(state+1);
@@ -84,25 +61,26 @@ static inline void alloc_state_arena() {
             RttiEntry entry = RTTI_ENTRIES[i];
             state->rtti[i].size = entry.size;
             state->rtti[i].offset = entry.offset;
-            state->rtti[i].name = strp;
 
+            state->rtti[i].name = strp;
             strp += strlencpy(strp, entry.name)+1;
+
             state->rtti[i].type = strp;
             strp += strlencpy(strp, entry.type)+1;
         }
     #else
-        state = malloc(sizeof(State));
+        state = s;
     #endif
 }
 
-static inline void init_state() {
-    alloc_state_arena();
+static inline void init_state(void* s) {
+    alloc_state_arena(s);
     state->x = 1;
     state->y = 2;
 }
 
-void plug_init(void) {
-    init_state();
+void plug_init(void* plug) {
+    init_state(plug);
 }
 
 State* plug_pre_reload(void){

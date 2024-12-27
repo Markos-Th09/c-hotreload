@@ -1,10 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "hotreload.h"
 
 int main() {
-    if (!reload_libplug()) return 1;
-    plug_init();
+    INIT(State);
 
     while (1) {
         plug_update();

@@ -4,6 +4,10 @@
 #include <stdbool.h>
 #include "plug.h"
 
+#define INIT(State) State state = {0}; \
+    if (!reload_libplug()) return 1; \
+    plug_init(&state);
+
 #ifdef HOTRELOAD
 #define PLUG(name, ...) extern name##_t *name;
 PLUG_LIST
