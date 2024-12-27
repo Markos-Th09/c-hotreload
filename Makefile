@@ -1,3 +1,4 @@
+CC ?= cc
 CFLAGS = -Wall -g
 HOTRELOAD ?= true
 
