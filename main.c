@@ -2,7 +2,7 @@
 #include "hotreload.h"
 
 int main() {
-    INIT(State);
+    PLUG_INIT(State);
 
     while (1) {
         plug_update();

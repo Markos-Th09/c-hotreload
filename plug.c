@@ -32,6 +32,7 @@ static inline void init_state(void* s);
 static inline void merge_state(State* old_state) {
     #ifdef HOTRELOAD
         init_state(NULL);
+        state->version = old_state->version + 1;
         for (size_t i = 0; i < sizeof(RTTI_ENTRIES)/sizeof(RttiEntry); i++) {
             RttiEntry entry = RTTI_ENTRIES[i];
             for (size_t j = 0; j < old_state->rtti_len; j++) {
@@ -55,6 +56,7 @@ static inline void alloc_state_arena(void* s) {
         state = malloc(STATE_ARENA_SIZE);
         state->rtti = (RttiEntry*)(state+1);
         state->rtti_len = sizeof(RTTI_ENTRIES)/sizeof(RttiEntry);
+        state->version = 0;
 
         char* strp = (char*)state->rtti+sizeof(RTTI_ENTRIES);
         for (size_t i = 0; i < state->rtti_len; i++) {
@@ -79,16 +81,16 @@ static inline void init_state(void* s) {
     state->y = 2;
 }
 
-void plug_init(void* plug) {
-    init_state(plug);
+void plug_init(void* s) {
+    init_state(s);
 }
 
 State* plug_pre_reload(void){
     return state;
 }
 
-void plug_post_reload(void* state) {
-    merge_state(state);
+void plug_post_reload(void* old_state) {
+    merge_state(old_state);
 }
 
 void plug_update(void) {

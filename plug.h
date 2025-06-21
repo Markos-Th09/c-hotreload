@@ -21,6 +21,7 @@ typedef struct {
     #ifdef HOTRELOAD
     RttiEntry* rtti;
     size_t rtti_len;
+    size_t version;
     #endif
     STATE_FIELDS
 } State;

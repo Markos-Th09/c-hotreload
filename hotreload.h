@@ -4,9 +4,18 @@
 #include <stdbool.h>
 #include "plug.h"
 
-#define INIT(State) State state = {0}; \
-    if (!reload_libplug()) return 1; \
-    plug_init(&state);
+#ifdef HOTRELOAD
+    #define PLUG_INIT(State) do { \
+        if (!reload_libplug()) return 1; \
+        plug_init(NULL); \
+    } while (0)
+#else
+    #define PLUG_INIT(State) do { \
+        static State state = {0}; \
+        if (!reload_libplug()) return 1; \
+        plug_init(&state); \
+    } while (0)
+#endif
 
 #ifdef HOTRELOAD
 #define PLUG(name, ...) extern name##_t *name;
